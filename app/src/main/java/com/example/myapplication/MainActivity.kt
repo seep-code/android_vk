@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.ui.theme.MyApplicationTheme
 
@@ -26,7 +28,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MainScreen()
+            MyApplicationTheme {
+                MainScreen()
+            }
         }
     }
 }
@@ -34,15 +38,13 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     var text by remember { mutableStateOf("") }
-    MyApplicationTheme {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            SimpleTextField(text = text, onTextChange = { text = it })
-            OpenSecondActivityButton {}
-        }
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        SimpleTextField(text = text, onTextChange = { text = it })
+        OpenSecondActivityButton(text)
     }
 }
 
@@ -51,13 +53,20 @@ fun SimpleTextField(text: String, onTextChange: (String) -> Unit) {
     OutlinedTextField(
         value = text,
         onValueChange = onTextChange,
-        label = { Text("type here") }
+        label = { Text("Введите текст") }
     )
 }
 
 @Composable
-fun OpenSecondActivityButton(onClick: () -> Unit) {
-    Button(onClick = { onClick() }) {
+fun OpenSecondActivityButton(text: String) {
+    val context = LocalContext.current
+    Button(
+        onClick = {
+            val intent = Intent(context, SecondActivity::class.java)
+            intent.putExtra("EXTRA_TEXT", text)
+            context.startActivity(intent)
+        }
+    ) {
         Text("Открыть вторую Activity")
     }
 }

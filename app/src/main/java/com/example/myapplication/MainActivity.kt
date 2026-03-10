@@ -2,6 +2,7 @@ package com.example.myapplication
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import androidx.core.net.toUri
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +47,7 @@ fun MainScreen() {
     ) {
         SimpleTextField(text = text, onTextChange = { text = it })
         OpenSecondActivityButton(text)
+        CallFriendButton(text)
     }
 }
 
@@ -68,5 +71,31 @@ fun OpenSecondActivityButton(text: String) {
         }
     ) {
         Text("Открыть вторую Activity")
+    }
+}
+
+@Composable
+fun CallFriendButton(text: String) {
+    val context = LocalContext.current
+    Button(
+        onClick = {
+            when {
+                (text.isBlank()) -> {
+                    val message = "Введите номер телефона"
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
+                (!text.matches(Regex("^\\+?\\d+$"))) -> {
+                    val message = "Некорректный номер. Только цифры или + в начале"
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                    val phone = text
+                    val intent = Intent(Intent.ACTION_DIAL, "tel:$phone".toUri())
+                    context.startActivity(intent)
+                }
+            }
+        }
+    ) {
+        Text("Позвонить другу")
     }
 }

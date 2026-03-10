@@ -40,6 +40,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     var text by remember { mutableStateOf("") }
+
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -48,6 +49,7 @@ fun MainScreen() {
         SimpleTextField(text = text, onTextChange = { text = it })
         OpenSecondActivityButton(text)
         CallFriendButton(text)
+        ShareTextButton(text)
     }
 }
 
@@ -63,11 +65,20 @@ fun SimpleTextField(text: String, onTextChange: (String) -> Unit) {
 @Composable
 fun OpenSecondActivityButton(text: String) {
     val context = LocalContext.current
+
     Button(
         onClick = {
-            val intent = Intent(context, SecondActivity::class.java)
-            intent.putExtra("EXTRA_TEXT", text)
-            context.startActivity(intent)
+            when {
+                text.isBlank() -> {
+                    val message = "Введите текст"
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                    val intent = Intent(context, SecondActivity::class.java)
+                    intent.putExtra("EXTRA_TEXT", text)
+                    context.startActivity(intent)
+                }
+            }
         }
     ) {
         Text("Открыть вторую Activity")
@@ -77,14 +88,15 @@ fun OpenSecondActivityButton(text: String) {
 @Composable
 fun CallFriendButton(text: String) {
     val context = LocalContext.current
+
     Button(
         onClick = {
             when {
-                (text.isBlank()) -> {
+                text.isBlank() -> {
                     val message = "Введите номер телефона"
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
-                (!text.matches(Regex("^\\+?\\d+$"))) -> {
+                !text.matches(Regex("^\\+?\\d+$")) -> {
                     val message = "Некорректный номер. Только цифры или + в начале"
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
@@ -97,5 +109,29 @@ fun CallFriendButton(text: String) {
         }
     ) {
         Text("Позвонить другу")
+    }
+}
+
+@Composable
+fun ShareTextButton(text: String) {
+    val context = LocalContext.current
+
+    Button(
+        onClick = {
+            when {
+                text.isBlank() -> {
+                    val message = "Нечем делиться :("
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                    val intent = Intent(Intent.ACTION_SEND)
+                    intent.putExtra(Intent.EXTRA_TEXT, text)
+                    intent.type = "text/plain"
+                    context.startActivity(intent)
+                }
+            }
+        }
+    ) {
+        Text("Поделиться текстом")
     }
 }
